@@ -1,0 +1,203 @@
+<div class="home-container">
+  
+  <!-- Hero Section with Background Image -->
+  <section class="hero-section">
+    <div class="hero-background" 
+         [style.background-image]="heroBackgroundStyle">
+      <div class="hero-content">
+        <div class="hero-text-direct">
+          <h1 class="hero-title">
+            One Platform <span class="highlight-text">Countless</span> Events Endless Ventures 
+          </h1>
+          <p class="hero-subtitle">
+            Join thousands of students and professionals in creating unforgettable experiences
+          </p>
+          <div class="hero-actions">
+            <button class="primary-cta" *ngIf="!isLoggedIn" routerLink="/auth/login">
+              <span>Get Started Today</span>
+            </button>
+            <button class="secondary-cta" routerLink="/events">
+              <span>Explore Events</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Events Conducted Card -->
+    <div class="events-conducted-card">
+      <div class="card-header">
+        <span class="card-title">Events Conducted</span>
+        <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M13.025 1l-2.847 2.828 6.176 6.176h-16.354v3.992h16.354l-6.176 6.176 2.847 2.828 10.975-11z"/>
+        </svg>
+      </div>
+      
+      <div class="card-content">
+        <div class="event-images-stack">
+          <div class="image-circle" *ngFor="let image of getEventsDisplayImages(); let i = index" 
+               [style.background-image]="'url(' + image + ')'"
+               [style.z-index]="getEventsDisplayImages().length - i"
+               [style.left.px]="i * 15">
+          </div>
+        </div>
+        
+        <div class="stats-section">
+          <div class="event-count">{{ completedEventsCount }}+</div>
+          <div class="stat-label">Expertly Managed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Event Timer -->
+  <section class="timer-section" *ngIf="nextEvent">
+    <div class="timer-container">
+      <h2 class="timer-title">Next Event: {{ nextEvent.event_name }}</h2>
+      <div class="event-timer">
+        <div class="timer-unit">
+          <span class="timer-value">{{ timeLeft.days }}</span>
+          <span class="timer-label">Days</span>
+        </div>
+        <div class="timer-separator">:</div>
+        <div class="timer-unit">
+          <span class="timer-value">{{ timeLeft.hours }}</span>
+          <span class="timer-label">Hours</span>
+        </div>
+        <div class="timer-separator">:</div>
+        <div class="timer-unit">
+          <span class="timer-value">{{ timeLeft.minutes }}</span>
+          <span class="timer-label">Minutes</span>
+        </div>
+        <div class="timer-separator">:</div>
+        <div class="timer-unit">
+          <span class="timer-value">{{ timeLeft.seconds }}</span>
+          <span class="timer-label">Seconds</span>
+        </div>
+      </div>
+      <p class="event-details">{{ nextEvent.event_description }}</p>
+    </div>
+  </section>
+
+  <!-- Section 3: Upcoming Events Display -->
+  <section class="events-section">
+    <div class="section-header">
+      <h2 class="section-title">Upcoming Events</h2>
+      <p class="section-subtitle">Discover exciting opportunities to learn, grow, and connect</p>
+    </div>
+    
+    <div class="events-grid">
+      <div class="event-card" *ngFor="let event of getCurrentPageEvents()">
+        <div class="event-image" [style.background-image]="'url(' + getEventImage(event.event_id) + ')'">
+          <!-- Date Badge -->
+          <div class="date-badge">
+            <div class="date-number">{{ getDateNumber(event.event_start_date) }}</div>
+            <div class="date-month">{{ getDateMonth(event.event_start_date) }}</div>
+          </div>
+          
+          <!-- Heart/Favorite Icon with Toggle -->
+          <div class="favorite-icon" (click)="toggleFavorite(event.event_id)">
+            <svg width="24" height="24" viewBox="0 0 24 24" class="heart-icon" [class.favorited]="isFavorite(event.event_id)">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </div>
+        </div>
+        
+        <div class="event-content">
+          <!-- Event Type Badge -->
+          <div class="event-type-tag">{{ event.event_type }}</div>
+          
+          <!-- Event Title -->
+          <h3 class="event-title">{{ event.event_name }}</h3>
+          
+          <!-- Event Meta Information -->
+          <div class="event-meta">
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" class="meta-icon">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <span>{{ event.venue?.name || 'TBA' }}</span>
+            </div>
+            <div class="meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" class="meta-icon">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+              </svg>
+              <span>{{ formatEventDate(event.event_start_date) }} • {{ event.event_time }}</span>
+            </div>
+            <div class="meta-item" *ngIf="event.club">
+              <svg width="16" height="16" viewBox="0 0 24 24" class="meta-icon">
+                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A3.01 3.01 0 0 0 16.5 6.5c-1.1 0-2.05.59-2.58 1.47l-2.54 4.48c-.52.92-1.54 1.55-2.75 1.55-.83 0-1.58-.34-2.12-.89L8.38 15H10v6H4v-6l6-16h4l6 16v6h-4z"/>
+              </svg>
+              <span>By {{ event.club.name }}</span>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="event-actions">
+            <button class="register-btn primary" (click)="registerForEvent(event)">
+              Register
+            </button>
+            <button class="details-btn secondary" (click)="viewEventDetails(event)">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Pagination -->
+    <div class="pagination" *ngIf="totalEventPages > 1">
+      <button 
+        class="page-btn" 
+        *ngFor="let page of getEventPageNumbers(); let i = index"
+        [class.active]="currentEventPage === page"
+        (click)="goToEventPage(page)">
+        {{ '12345678910'.charAt(i) || (i + 1) }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Section 4: Blogs / Messages -->
+  <section class="comments-section">
+    <div class="section-header">
+      <h2 class="section-title">Community Voices</h2>
+      <button class="add-comment-btn" (click)="addComment()">
+        <div class="comment-btn-content">
+          <div class="plus-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            </svg>
+          </div>
+          <span>Comment</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="comments-container">
+      <div class="comment-card" *ngFor="let comment of recentComments">
+        <div class="comment-header">
+          <div class="comment-avatar">
+            {{ comment.userName.charAt(0).toUpperCase() }}
+          </div>
+          <div class="comment-info">
+            <h4 class="comment-author">{{ comment.userName }}</h4>
+            <span class="comment-date">{{ comment.dateTime | date: 'short' }}</span>
+          </div>
+        </div>
+        <p class="comment-content">{{ comment.content }}</p>
+      </div>
+
+      <div class="no-comments" *ngIf="recentComments.length === 0">
+        <p>No comments yet. Be the first to share your thoughts!</p>
+      </div>
+
+      <button class="load-more-btn" *ngIf="recentComments.length >= 3" (click)="viewMoreComments()">
+        View More Comments
+      </button>
+    </div>
+  </section>
+
+  <!-- Shared Footer Component -->
+  <app-footer [currentPage]="'home'"></app-footer>
+
+</div>
