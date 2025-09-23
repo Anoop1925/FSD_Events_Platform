@@ -5,11 +5,19 @@ export interface User {
   lastName: string;
   college: string;
   contact: string;
+  role?: string; // Add role field for admin/student differentiation
+}
+
+export interface Admin {
+  adminId: number;
+  email: string;
+  name: string;
+  role: string;
 }
 
 export interface AuthResponse {
   token: string | null;
-  user: User | null;
+  user: User | Admin | null;
   message: string;
 }
 

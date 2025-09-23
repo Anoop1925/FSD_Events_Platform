@@ -1,7 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FooterComponent } from '../../components/shared/footer/footer.component';
 
 @Component({
@@ -11,10 +11,42 @@ import { FooterComponent } from '../../components/shared/footer/footer.component
   templateUrl: './support.component.html',
   styleUrl: './support.component.scss'
 })
-export class SupportComponent {
+export class SupportComponent implements OnInit, AfterViewInit {
   @ViewChild('supportFormRef') supportFormRef!: NgForm;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    // Handle fragment navigation
+    this.route.fragment.subscribe(fragment => {
+      if (fragment) {
+        // Use a longer timeout to ensure DOM is ready
+        setTimeout(() => this.scrollToElement(fragment), 300);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Handle fragment if component is already loaded and DOM is ready
+    const currentFragment = this.route.snapshot.fragment;
+    if (currentFragment) {
+      setTimeout(() => this.scrollToElement(currentFragment), 500);
+    }
+  }
+
+  private scrollToElement(elementId: string): void {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start',
+        inline: 'nearest' 
+      });
+    }
+  }
 
   // Form data
   supportForm = {
@@ -143,7 +175,7 @@ export class SupportComponent {
 
     loginBtn.addEventListener('click', () => {
       document.body.removeChild(backdrop);
-      this.router.navigate(['/login']);
+      this.router.navigate(['/auth/signin']);
     });
 
     closeBtn.addEventListener('click', () => {

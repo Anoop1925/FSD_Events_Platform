@@ -4,13 +4,16 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "admins")
+public class Admin {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "admin_id")
+    private Long adminId;
+    
+    @Column(name = "name", nullable = false)
+    private String name;
     
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -18,20 +21,8 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
     
-    @Column(name = "first_name")
-    private String firstName;
-    
-    @Column(name = "last_name")
-    private String lastName;
-    
-    @Column(name = "college")
-    private String college;
-    
-    @Column(name = "contact")
-    private String contact;
-    
     @Column(name = "role", nullable = false)
-    private String role = "STUDENT";
+    private String role = "ADMIN";
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -40,30 +31,35 @@ public class User {
     private LocalDateTime updatedAt;
     
     // Default constructor
-    public User() {
+    public Admin() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.role = "STUDENT";
+        this.role = "ADMIN";
     }
     
     // Constructor with parameters
-    public User(String email, String password, String firstName, String lastName, String college, String contact) {
+    public Admin(String name, String email, String password) {
         this();
+        this.name = name;
         this.email = email;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.college = college;
-        this.contact = contact;
     }
     
     // Getters and setters
-    public Long getUserId() {
-        return userId;
+    public Long getAdminId() {
+        return adminId;
     }
     
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
     }
     
     public String getEmail() {
@@ -80,38 +76,6 @@ public class User {
     
     public void setPassword(String password) {
         this.password = password;
-    }
-    
-    public String getFirstName() {
-        return firstName;
-    }
-    
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    
-    public String getLastName() {
-        return lastName;
-    }
-    
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-    
-    public String getCollege() {
-        return college;
-    }
-    
-    public void setCollege(String college) {
-        this.college = college;
-    }
-    
-    public String getContact() {
-        return contact;
-    }
-    
-    public void setContact(String contact) {
-        this.contact = contact;
     }
     
     public String getRole() {
@@ -143,15 +107,17 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
     
+    // Utility method to check if email follows admin pattern
+    public static boolean isValidAdminEmail(String email) {
+        return email != null && email.endsWith("@admin.org");
+    }
+    
     @Override
     public String toString() {
-        return "User{" +
-                "userId=" + userId +
+        return "Admin{" +
+                "adminId=" + adminId +
+                ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", college='" + college + '\'' +
-                ", contact='" + contact + '\'' +
                 ", role='" + role + '\'' +
                 '}';
     }

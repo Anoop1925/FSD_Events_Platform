@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/user.model';
+import { AuthResponse, LoginRequest, RegisterRequest, User, Admin } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/auth';
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<User | Admin | null>(null);
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
 
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -65,7 +65,7 @@ export class AuthService {
   }
 
   // Get current user
-  getCurrentUser(): User | null {
+  getCurrentUser(): User | Admin | null {
     return this.currentUserSubject.value;
   }
 
@@ -83,7 +83,7 @@ export class AuthService {
   }
 
   // Private methods
-  private setAuthData(token: string, user: User): void {
+  private setAuthData(token: string, user: User | Admin): void {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       localStorage.setItem('authToken', token);
       localStorage.setItem('currentUser', JSON.stringify(user));

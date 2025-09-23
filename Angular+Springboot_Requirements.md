@@ -749,11 +749,10 @@ The navigation bar provides users with easy access to all major sections of the 
 
 **Image Files**
 
-* `navbar-logo.png`: Platform logo image. Logo besides the Floating navbar...
-* `navbar-style.png`: Floating styled navbar
-* `login-page-layout.png`: Layout for login and signup page.
-* `calendar-icon.png`: Event calendar icon. also no need for this. Take a very nice visualistic, modern popular icon library and use icons from their.
-* `user-icon-placeholder.png`: Random user icon display. Take random user icons (professional-user - 2-5 icons in loop) from any library, or if able to implement like google, initials of username with random color in bg...
+* `signin-page-layout.png`: On click of sign in button from navbar it will direct to page looking same like this
+* `signin-page-img.png`: The image on the right half of the above mentioned page for student side
+* `signup-formpage-layout.png`: Layout for signup page. form layout to be same, but according to our website.
+* `login-formpage-layout.png`: Layout for login page. form layout to be same, but according to our website.
 
 **CSV Files**
 

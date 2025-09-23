@@ -8,18 +8,20 @@ public class UserResponse {
     private String lastName;
     private String college;
     private String contact;
+    private String role;
     
     // Default constructor
     public UserResponse() {}
     
     // Constructor
-    public UserResponse(Long userId, String email, String firstName, String lastName, String college, String contact) {
+    public UserResponse(Long userId, String email, String firstName, String lastName, String college, String contact, String role) {
         this.userId = userId;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.college = college;
         this.contact = contact;
+        this.role = role;
     }
     
     // Getters and setters
@@ -69,5 +71,13 @@ public class UserResponse {
     
     public void setContact(String contact) {
         this.contact = contact;
+    }
+    
+    public String getRole() {
+        return role;
+    }
+    
+    public void setRole(String role) {
+        this.role = role;
     }
 }

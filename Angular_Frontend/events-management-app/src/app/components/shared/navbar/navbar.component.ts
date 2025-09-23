@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { ThemeService } from '../../../services/theme.service';
-import { User } from '../../../models/user.model';
+import { User, Admin } from '../../../models/user.model';
 
 @Component({
   selector: 'app-navbar',
@@ -15,7 +15,7 @@ import { User } from '../../../models/user.model';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
-  currentUser: User | null = null;
+  currentUser: User | Admin | null = null;
   isDarkMode = false;
   
   private subscriptions = new Subscription();
@@ -35,7 +35,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.add(
-      this.authService.currentUser$.subscribe((user: User | null) => {
+      this.authService.currentUser$.subscribe((user: User | Admin | null) => {
         this.currentUser = user;
       })
     );
@@ -62,7 +62,43 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToLogin(): void {
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/auth/signin']);
+  }
+
+  navigateToSignUp(): void {
+    this.router.navigate(['/auth/signup']);
+  }
+
+  // Helper methods for template
+  getUserDisplayName(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.isAdmin(this.currentUser)) {
+      // Admin user
+      return this.currentUser.name;
+    } else {
+      // Regular user
+      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+    }
+  }
+
+  getUserInitials(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.isAdmin(this.currentUser)) {
+      // Admin user
+      const names = this.currentUser.name.split(' ');
+      return names.length > 1 
+        ? `${names[0].charAt(0)}${names[names.length - 1].charAt(0)}` 
+        : names[0].charAt(0);
+    } else {
+      // Regular user
+      return `${this.currentUser.firstName?.charAt(0) || ''}${this.currentUser.lastName?.charAt(0) || ''}`;
+    }
+  }
+
+  private isAdmin(user: User | Admin): user is Admin {
+    return 'name' in user && 'adminId' in user && !('userId' in user);
   }
 
   navigateToCalendar(): void {

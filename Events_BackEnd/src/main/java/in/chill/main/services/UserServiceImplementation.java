@@ -52,7 +52,8 @@ public class UserServiceImplementation implements UserService {
                 savedUser.getFirstName(),
                 savedUser.getLastName(),
                 savedUser.getCollege(),
-                savedUser.getContact()
+                savedUser.getContact(),
+                savedUser.getRole()
             );
             
             return new AuthResponse(token, userResponse, "User registered successfully");
@@ -89,7 +90,8 @@ public class UserServiceImplementation implements UserService {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getCollege(),
-                user.getContact()
+                user.getContact(),
+                user.getRole()
             );
             
             return new AuthResponse(token, userResponse, "Login successful");
@@ -119,7 +121,8 @@ public class UserServiceImplementation implements UserService {
             user.getFirstName(),
             user.getLastName(),
             user.getCollege(),
-            user.getContact()
+            user.getContact(),
+            user.getRole()
         );
     }
     
