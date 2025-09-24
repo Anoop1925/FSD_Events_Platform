@@ -1,14 +1,16 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { EventService } from '../../services/event.service';
 import { CommentService } from '../../services/comment.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { FeedbackService } from '../../services/feedback.service';
 import { FooterComponent } from '../../components/shared/footer/footer.component';
 import { Event } from '../../models/event.model';
 import { Comment } from '../../models/comment.model';
+import { User, Admin } from '../../models/user.model';
 
 @Component({
   selector: 'app-home',
@@ -48,6 +50,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   showCharacterGlow = false;
   hideInteractionHint = false;
   showSpeechBubble = false;
+  
+  // Feedback overlay properties
+  showFeedbackOverlay = false;
+  feedbackOverlayTimeout: any;
   speechBubbleText = '';
   
   // Cursor trail and particles
@@ -114,6 +120,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private commentService: CommentService,
     private authService: AuthService,
     private themeService: ThemeService,
+    private feedbackService: FeedbackService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -137,6 +145,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.unsubscribe();
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
+    }
+    if (this.feedbackOverlayTimeout) {
+      clearTimeout(this.feedbackOverlayTimeout);
     }
   }
 
@@ -190,7 +201,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscribeToAuth(): void {
     this.subscriptions.add(
       this.authService.isLoggedIn$.subscribe((isLoggedIn: boolean) => {
+        const wasLoggedOut = !this.isLoggedIn;
         this.isLoggedIn = isLoggedIn;
+        
+        // Show feedback overlay after successful login (with delay)
+        if (isLoggedIn && wasLoggedOut) {
+          this.showFeedbackOverlayAfterLogin();
+        }
       })
     );
   }
@@ -201,6 +218,41 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isDarkMode = isDark;
       })
     );
+  }
+
+  // Feedback overlay methods
+  private showFeedbackOverlayAfterLogin(): void {
+    // Get current user to check email
+    this.subscriptions.add(
+      this.authService.currentUser$.subscribe((user: User | Admin | null) => {
+        if (user && user.email) {
+          // Check if user has already submitted feedback
+          const hasSubmittedFeedback = this.feedbackService.hasFeedbackBeenSubmitted(user.email);
+          
+          if (!hasSubmittedFeedback) {
+            // Delay showing the overlay to let the page load fully
+            this.feedbackOverlayTimeout = setTimeout(() => {
+              if (this.isLoggedIn && !this.componentDestroyed) {
+                this.showFeedbackOverlay = true;
+              }
+            }, 2000); // 2 second delay after login
+          }
+        }
+      })
+    );
+  }
+
+  closeFeedbackOverlay(): void {
+    this.showFeedbackOverlay = false;
+    if (this.feedbackOverlayTimeout) {
+      clearTimeout(this.feedbackOverlayTimeout);
+    }
+  }
+
+  openFeedbackForm(): void {
+    this.closeFeedbackOverlay();
+    // Navigate to feedback form (we'll create this route)
+    this.router.navigate(['/feedback']);
   }
 
   private startEventTimer(): void {

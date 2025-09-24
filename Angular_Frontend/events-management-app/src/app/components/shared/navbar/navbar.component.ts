@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
@@ -17,13 +17,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   currentUser: User | Admin | null = null;
   isDarkMode = false;
+  isUserDropdownOpen = false;
   
   private subscriptions = new Subscription();
 
   constructor(
     private authService: AuthService,
     private themeService: ThemeService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +48,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.isDarkMode = isDark;
       })
     );
+
+    // Close dropdown when clicking outside (only in browser)
+    if (isPlatformBrowser(this.platformId)) {
+      document.addEventListener('click', (event: Event) => {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.user-dropdown')) {
+          this.isUserDropdownOpen = false;
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -57,6 +69,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
+    this.closeUserDropdown();
     this.authService.logout();
     this.router.navigate(['/']);
   }
@@ -97,6 +110,39 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
 
+  getUserEmail(): string {
+    if (!this.currentUser) return '';
+    return this.currentUser.email;
+  }
+
+  getUserContact(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.isAdmin(this.currentUser)) {
+      return ''; // Admins don't have contact info
+    } else {
+      return this.currentUser.contact || '';
+    }
+  }
+
+  getUserCollege(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.isAdmin(this.currentUser)) {
+      return 'Admin Access'; // Admin indicator
+    } else {
+      return this.currentUser.college || '';
+    }
+  }
+
+  toggleUserDropdown(): void {
+    this.isUserDropdownOpen = !this.isUserDropdownOpen;
+  }
+
+  closeUserDropdown(): void {
+    this.isUserDropdownOpen = false;
+  }
+
   private isAdmin(user: User | Admin): user is Admin {
     return 'name' in user && 'adminId' in user && !('userId' in user);
   }
@@ -111,6 +157,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   private showLoginRequiredPopup(): void {
+    // Only run in browser environment
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     const popup = document.createElement('div');
     popup.innerHTML = `
       <div style="

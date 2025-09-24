@@ -1,5 +1,9 @@
 package in.chill.main.entity;
 
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,8 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "feedback")
@@ -48,6 +52,7 @@ public class Feedback {
     
     @ManyToOne
     @JoinColumn(name = "registration_id")
+    @JsonIgnore // Prevent JSON serialization issues
     private Registration registration;
     
     // Default constructor
@@ -156,6 +161,13 @@ public class Feedback {
     
     public void setRegistration(Registration registration) {
         this.registration = registration;
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        if (this.dateTime == null) {
+            this.dateTime = LocalDateTime.now();
+        }
     }
     
     @Override

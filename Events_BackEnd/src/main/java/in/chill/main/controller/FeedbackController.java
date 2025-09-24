@@ -1,5 +1,6 @@
 package in.chill.main.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +42,23 @@ public class FeedbackController {
     }
     
     @PostMapping("/feedbacks")
-    public Feedback createFeedback(@RequestBody Feedback feedback) {
-        return feedbackService.createFeedback(feedback);
+    public ResponseEntity<Feedback> createFeedback(@RequestBody Feedback feedback) {
+        try {
+            // Set current datetime when creating feedback
+            feedback.setDateTime(LocalDateTime.now());
+            System.out.println("Setting datetime to: " + LocalDateTime.now());
+            System.out.println("Received feedback data: " + feedback.toString());
+            
+            Feedback savedFeedback = feedbackService.createFeedback(feedback);
+            System.out.println("Saved feedback datetime: " + savedFeedback.getDateTime());
+            System.out.println("Returning saved feedback: " + savedFeedback.toString());
+            
+            return ResponseEntity.ok(savedFeedback);
+        } catch (Exception e) {
+            System.err.println("Error creating feedback: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
     
     @PutMapping("/feedbacks/{id}")
